@@ -430,4 +430,47 @@ class AccesoBD
         return $alumnos;
     }
     
+    /**
+     * Devuelve estadísticas para el dashboard del profesor de un centro
+     * @param int $id_centro
+     * @return array
+     */
+    function obtenerStatsCentro($id_centro) {
+        $id_centro = (int)$id_centro;
+        $stats = [
+            'num_alumnos' => 0,
+            'porcentaje_participacion' => 0,
+            'media_participacion' => 0,
+            'num_completados' => 0
+        ];
+        //numero de alumnos
+        $sql_alumnos = "SELECT COUNT(*) as total FROM usuario WHERE id_rol = 1 AND id_centro = $id_centro";
+        $res_alumnos = $this->lanzarSQL($sql_alumnos);
+        if ($res_alumnos && mysqli_num_rows($res_alumnos) > 0) {
+            $row = mysqli_fetch_assoc($res_alumnos);
+            $stats['num_alumnos'] = $row['total'];
+        }
+        //porcentaje de participacion dependiendo del numero de alumnos que han jugado al menos una vez
+        $sql_part = "SELECT COUNT(DISTINCT r.id_usuario) as participantes FROM resultado r JOIN usuario u ON r.id_usuario = u.id_usuario WHERE u.id_rol = 1 AND u.id_centro = $id_centro";
+        $res_part = $this->lanzarSQL($sql_part);
+        if ($res_part && mysqli_num_rows($res_part) > 0) {
+            $row = mysqli_fetch_assoc($res_part);
+            $stats['porcentaje_participacion'] = $stats['num_alumnos'] > 0 ? round(($row['participantes'] / $stats['num_alumnos']) * 100) : 0;
+        }
+        //media de participación dependiendo del número de juegos jugados por usuario
+        $sql_media = "SELECT AVG(num_juegos) as media FROM (SELECT COUNT(*) as num_juegos FROM resultado r JOIN usuario u ON r.id_usuario = u.id_usuario WHERE u.id_rol = 1 AND u.id_centro = $id_centro GROUP BY r.id_usuario) as sub";
+        $res_media = $this->lanzarSQL($sql_media);
+        if ($res_media && mysqli_num_rows($res_media) > 0) {
+            $row = mysqli_fetch_assoc($res_media);
+            $stats['media_participacion'] = $row['media'] ? round($row['media']) : 0;
+        }
+        //numero de juegos completados
+        $sql_completados = "SELECT COUNT(*) as completados FROM resultado r JOIN usuario u ON r.id_usuario = u.id_usuario WHERE r.completado = 1 AND u.id_rol = 1 AND u.id_centro = $id_centro";
+        $res_completados = $this->lanzarSQL($sql_completados);
+        if ($res_completados && mysqli_num_rows($res_completados) > 0) {
+            $row = mysqli_fetch_assoc($res_completados);
+            $stats['num_completados'] = $row['completados'];
+        }
+        return $stats;
+    }
 }

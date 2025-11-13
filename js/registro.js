@@ -120,11 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 window.addEventListener("pageshow", (event) => {
-  // Si la página se carga desde el caché del navegador (bfcache)
+  //si el usuario recarga la página (para que no haya bucle de carga)
   if (event.persisted) {
     const loadingOverlay = document.getElementById("loading-overlay")
     if (loadingOverlay) {
-      // Ocultar la animación de carga inmediatamente
+      //ocultar la animación de carga inmediatamente
       loadingOverlay.classList.remove("active")
     }
   }

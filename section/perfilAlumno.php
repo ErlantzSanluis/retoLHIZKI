@@ -74,7 +74,7 @@ $accesoBD->cerrarConexion();
                 <i class="bi bi-circle"></i>
                 <span>Parte-hartzea</span>
             </div>
-            <button class="start-game-btn">Hasi jolasa</button>
+            <button class="start-game-btn" onclick="location.href='juegoAdivinaHitza.php'">Hasi jolasa</button>
         </div>
 
         <div class="stats-grid">

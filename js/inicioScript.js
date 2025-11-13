@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       this.style.transform = "scale(1)"
     }, 150)
-    alert("¡Notificaciones próximamente!")
   })
 
   // Funcionalidad del botón de misiones
@@ -38,8 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     this.textContent = "Kargatzen..."
     setTimeout(() => {
       this.textContent = "Hasi jolasa"
-      alert("¡Comenzando el juego!")
-    }, 1000)
+    }, 4000)
   })
 
   // Hacer las tarjetas de características clicables

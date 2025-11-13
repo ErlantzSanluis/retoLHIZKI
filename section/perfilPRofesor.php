@@ -12,220 +12,7 @@ require_once __DIR__ . '/../model/AccesoBD.php';
     <title>Irakasleen Panela - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 30px;
-        }
-
-        .header-section {
-            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-            border-radius: 16px;
-            padding: 40px 50px;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
-        }
-
-        .header-section h1 {
-            color: white;
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-        }
-
-        .header-section p {
-            color: rgba(255, 255, 255, 0.9);
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        .stats-card {
-            background: white;
-            border-radius: 16px;
-            padding: 35px 30px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            height: 100%;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-        }
-
-        .stats-card.blue {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        }
-
-        .stats-card.purple {
-            background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
-        }
-
-        .stats-card.green {
-            background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
-        }
-
-        .stats-card.yellow {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        }
-
-        .stats-card i {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .stats-card.blue i {
-            color: #2563eb;
-        }
-
-        .stats-card.purple i {
-            color: #9333ea;
-        }
-
-        .stats-card.green i {
-            color: #059669;
-        }
-
-        .stats-card.yellow i {
-            color: #d97706;
-        }
-
-        .stats-card .number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 10px 0 5px 0;
-            color: #1f2937;
-        }
-
-        .stats-card .label {
-            font-size: 1rem;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .content-section {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: #6b7280;
-        }
-
-        .progress-item {
-            margin-bottom: 25px;
-        }
-
-        .progress-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-
-        .progress-label .name {
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .progress-label .percentage {
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .progress {
-            height: 14px;
-            border-radius: 10px;
-            background-color: #f3f4f6;
-        }
-
-        .progress-bar {
-            border-radius: 10px;
-            transition: width 0.6s ease;
-        }
-
-        .progress-bar.teal {
-            background: linear-gradient(90deg, #14b8a6 0%, #0d9488 100%);
-        }
-
-        .progress-bar.blue {
-            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-        }
-
-        .progress-bar.purple {
-            background: linear-gradient(90deg, #a855f7 0%, #9333ea 100%);
-        }
-
-        .chart-container {
-            padding: 30px 20px;
-            min-height: 350px;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 280px;
-        }
-
-        .chart-line {
-            position: absolute;
-            bottom: 60px;
-            left: 40px;
-            right: 40px;
-            height: 180px;
-        }
-
-        .chart-line svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .chart-labels {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding: 0 40px;
-        }
-
-        .chart-label {
-            font-size: 0.95rem;
-            color: #6b7280;
-            font-weight: 500;
-        }
-
-        .chart-point {
-            fill: #14b8a6;
-            transition: r 0.2s;
-        }
-
-        .chart-point:hover {
-            r: 8;
-            fill: #0d9488;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/perfilProfesor.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -236,32 +23,45 @@ require_once __DIR__ . '/../model/AccesoBD.php';
         </div>
 
         <!-- Stats Cards -->
+        <?php
+        $id_centro = $_SESSION['id_centro'] ?? null;
+        $bd = new AccesoBD();
+        $stats = [
+            'num_alumnos' => 0,
+            'porcentaje_participacion' => 0,
+            'media_participacion' => 0,
+            'num_completados' => 0
+        ];
+        if ($id_centro) {
+            $stats = $bd->obtenerStatsCentro($id_centro);
+        }
+        ?>
         <div class="row g-4 mb-4">
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card blue">
                     <i class="bi bi-people-fill"></i>
-                    <div class="number">45</div>
+                    <div class="number"><?= $stats['num_alumnos'] ?></div>
                     <div class="label">Ikasleek</div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card purple">
                     <i class="bi bi-bar-chart-fill"></i>
-                    <div class="number">78%</div>
+                    <div class="number"><?= $stats['porcentaje_participacion'] ?>%</div>
                     <div class="label">Parted.</div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card green">
                     <i class="bi bi-graph-up-arrow"></i>
-                    <div class="number">85%</div>
+                    <div class="number"><?= $stats['media_participacion'] ?>%</div>
                     <div class="label">Batazb.</div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card yellow">
                     <i class="bi bi-check-circle-fill"></i>
-                    <div class="number">35</div>
+                    <div class="number"><?= $stats['num_completados'] ?></div>
                     <div class="label">Osatuta</div>
                 </div>
             </div>

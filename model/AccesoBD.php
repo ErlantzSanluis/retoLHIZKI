@@ -276,7 +276,7 @@ class AccesoBD
 
     //funcion para obtener los usuarios para la tablade admin
     function obtenerUsuarios(){
-        $result = mysqli_query($this->conexion, "SELECT u.id_usuario, u.nombre, u.apellidos, u.email, c.nombre_centro, cf.nombre_ciclo, u.puntos_totales 
+        $result = mysqli_query($this->conexion, "SELECT u.id_usuario, u.nombre, u.apellidos, u.email, u.id_centro, u.id_ciclo, c.nombre_centro, cf.nombre_ciclo, u.puntos_totales 
         FROM usuario u
         LEFT JOIN centro_educativo c ON u.id_centro = c.id_centro
         LEFT JOIN ciclo_formativo cf ON u.id_ciclo = cf.id_ciclo
@@ -310,6 +310,16 @@ class AccesoBD
                     id_ciclo = $id_ciclo, 
                     puntos_totales = $puntos_totales 
                 WHERE id_usuario = $id_usuario";
+
+        $resultado = mysqli_query($this->conexion, $sql);
+
+        return $resultado !== false;
+    }
+
+    function eliminarUsuario($id_usuario) {
+        $id_usuario = (int)$id_usuario;
+
+        $sql = "DELETE FROM usuario WHERE id_usuario = $id_usuario";
 
         $resultado = mysqli_query($this->conexion, $sql);
 

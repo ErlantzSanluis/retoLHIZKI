@@ -1,309 +1,296 @@
-//Estado del juego
-const gameState = {
-  preguntas: [],
-  currentQuestion: 0,
-  lives: 3,
-  correctAnswers: 0,
-  wrongAnswers: 0,
-  startTime: null,
-  totalQuestions: 10,
-}
+// Estado del juego - variables globales para guardar información
+var preguntas = [];
+var preguntaActual = 0;
+var vidas = 3;
+var aciertos = 0;
+var fallos = 0;
+var tiempoInicio = 0;
+var totalPreguntas = 10;
 
-// Elementos del DOM
-const loadingScreen = document.getElementById("loadingScreen")
-const gameScreen = document.getElementById("gameScreen")
-const resultsScreen = document.getElementById("resultsScreen")
-const questionWord = document.getElementById("questionWord")
-const answerInput = document.getElementById("answerInput")
-const submitBtn = document.getElementById("submitBtn")
-const feedbackMessage = document.getElementById("feedbackMessage")
-const progressBar = document.getElementById("progressBar")
-const progressText = document.getElementById("progressText")
+// Elementos del HTML que vamos a usar
+var pantallaLoading = document.getElementById("loadingScreen");
+var pantallaJuego = document.getElementById("gameScreen");
+var pantallaResultados = document.getElementById("resultsScreen");
+var palabraPregunta = document.getElementById("questionWord");
+var inputRespuesta = document.getElementById("answerInput");
+var botonEnviar = document.getElementById("submitBtn");
+var mensajeFeedback = document.getElementById("feedbackMessage");
+var barraProgreso = document.getElementById("progressBar");
+var textoProgreso = document.getElementById("progressText");
 
-// Inicializar el juego
-document.addEventListener("DOMContentLoaded", () => {
-  initGame()
+// Cuando la página carga, iniciamos el juego
+document.addEventListener("DOMContentLoaded", function() {
+  iniciarJuego();
 
-  // Event listeners
-  submitBtn.addEventListener("click", checkAnswer)
+  // Cuando hacen click en el botón de enviar
+  botonEnviar.addEventListener("click", function() {
+    comprobarRespuesta();
+  });
 
-  answerInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && !submitBtn.disabled) {
-      checkAnswer()
+  // Cuando presionan Enter en el input
+  inputRespuesta.addEventListener("keypress", function(evento) {
+    if (evento.key === "Enter" && !botonEnviar.disabled) {
+      comprobarRespuesta();
     }
-  })
+  });
 
-  // Limpiar feedback al escribir
-  answerInput.addEventListener("input", () => {
-    answerInput.classList.remove("correct", "incorrect")
-    feedbackMessage.classList.remove("show")
-  })
-})
+  // Limpiar el feedback cuando escriben
+  inputRespuesta.addEventListener("input", function() {
+    inputRespuesta.classList.remove("correct", "incorrect");
+    mensajeFeedback.classList.remove("show");
+  });
+});
 
-/**
- * Inicializar el juego
- */
-async function initGame() {
-  try {
-    showScreen("loading")
-
-    // Obtener preguntas del servidor
-    const response = await fetch("../controller/juego_controller.php?accion=obtener_preguntas")
-    const data = await response.json()
-
-    if (data.success && data.preguntas && data.preguntas.length >= 10) {
-      gameState.preguntas = data.preguntas
-      gameState.startTime = Date.now()
-
-      // Pequeño delay para mostrar la animación de carga
-      setTimeout(() => {
-        showScreen("game")
-        loadQuestion()
-      }, 1500)
-    } else {
-      showError("Ez dira nahikoa galdera aurkitu. Saiatu berriro geroago.")
+// Función para iniciar el juego
+function iniciarJuego() {
+  mostrarPantalla("loading");
+  
+  // Crear petición para obtener preguntas
+  var peticion = new XMLHttpRequest();
+  
+  // Qué hacer cuando llegue la respuesta
+  peticion.onreadystatechange = function() {
+    // readyState 4 = petición completada
+    // status 200 = respuesta exitosa
+    if (peticion.readyState === 4 && peticion.status === 200) {
+      // Convertir respuesta de texto a objeto JavaScript
+      var respuesta = JSON.parse(peticion.responseText);
+      
+      if (respuesta.success && respuesta.preguntas && respuesta.preguntas.length >= 10) {
+        preguntas = respuesta.preguntas;
+        tiempoInicio = new Date().getTime();
+        
+        // Esperar un poco para mostrar animación
+        setTimeout(function() {
+          mostrarPantalla("game");
+          cargarPregunta();
+        }, 1500);
+      } else {
+        mostrarError("Ez dira nahikoa galdera aurkitu. Saiatu berriro geroago.");
+      }
+    } else if (peticion.readyState === 4) {
+      // Si hay error
+      mostrarError("Errorea gertatu da jokoa hastean. Saiatu berriro.");
     }
-  } catch (error) {
-    console.error("Error al inicializar el juego:", error)
-    showError("Errorea gertatu da jokoa hastean. Saiatu berriro.")
+  };
+  
+  // Enviar petición al servidor
+  peticion.open("GET", "../controller/juego_controller.php?accion=obtener_preguntas", true);
+  peticion.send();
+}
+
+// Función para mostrar una pantalla específica
+function mostrarPantalla(pantalla) {
+  // Ocultar todas las pantallas
+  pantallaLoading.classList.remove("active");
+  pantallaJuego.classList.remove("active");
+  pantallaResultados.classList.remove("active");
+
+  // Mostrar la pantalla solicitada
+  if (pantalla === "loading") {
+    pantallaLoading.classList.add("active");
+  } else if (pantalla === "game") {
+    pantallaJuego.classList.add("active");
+  } else if (pantalla === "results") {
+    pantallaResultados.classList.add("active");
   }
 }
 
-/**
- * Mostrar una pantalla específica
- */
-function showScreen(screen) {
-  loadingScreen.classList.remove("active")
-  gameScreen.classList.remove("active")
-  resultsScreen.classList.remove("active")
-
-  switch (screen) {
-    case "loading":
-      loadingScreen.classList.add("active")
-      break
-    case "game":
-      gameScreen.classList.add("active")
-      break
-    case "results":
-      resultsScreen.classList.add("active")
-      break
-  }
-}
-
-/**
- * Cargar pregunta actual
- */
-function loadQuestion() {
-  if (gameState.currentQuestion >= gameState.totalQuestions) {
-    endGame()
-    return
+// Función para cargar la pregunta actual
+function cargarPregunta() {
+  // Si ya terminamos todas las preguntas
+  if (preguntaActual >= totalPreguntas) {
+    terminarJuego();
+    return;
   }
 
-  const pregunta = gameState.preguntas[gameState.currentQuestion]
-  questionWord.textContent = pregunta.termino_castellano
+  var pregunta = preguntas[preguntaActual];
+  palabraPregunta.textContent = pregunta.termino_castellano;
 
-  // Resetear input
-  answerInput.value = ""
-  answerInput.classList.remove("correct", "incorrect")
-  answerInput.disabled = false
-  answerInput.focus()
+  // Limpiar el input
+  inputRespuesta.value = "";
+  inputRespuesta.classList.remove("correct", "incorrect");
+  inputRespuesta.disabled = false;
+  inputRespuesta.focus();
 
-  // Resetear botón
-  submitBtn.disabled = false
+  // Activar botón
+  botonEnviar.disabled = false;
 
   // Ocultar feedback
-  feedbackMessage.classList.remove("show")
+  mensajeFeedback.classList.remove("show");
 
-  // Actualizar progreso
-  updateProgress()
+  // Actualizar barra de progreso
+  actualizarProgreso();
 }
 
-/**
- * Comprobar respuesta
- */
-function checkAnswer() {
-  const userAnswer = normalizeString(answerInput.value.trim())
-  const correctAnswer = normalizeString(gameState.preguntas[gameState.currentQuestion].respuesta_correcta)
+// Función para comprobar la respuesta del usuario
+function comprobarRespuesta() {
+  var respuestaUsuario = limpiarTexto(inputRespuesta.value.trim());
+  var respuestaCorrecta = limpiarTexto(preguntas[preguntaActual].respuesta_correcta);
 
   // Deshabilitar input y botón
-  answerInput.disabled = true
-  submitBtn.disabled = true
+  inputRespuesta.disabled = true;
+  botonEnviar.disabled = true;
 
-  if (userAnswer === correctAnswer) {
-    handleCorrectAnswer()
+  if (respuestaUsuario === respuestaCorrecta) {
+    manejarRespuestaCorrecta();
   } else {
-    handleWrongAnswer(gameState.preguntas[gameState.currentQuestion].respuesta_correcta)
+    manejarRespuestaIncorrecta(preguntas[preguntaActual].respuesta_correcta);
   }
 }
 
-/**
- * Manejar respuesta correcta
- */
-function handleCorrectAnswer() {
-  gameState.correctAnswers++
+// Función cuando la respuesta es correcta
+function manejarRespuestaCorrecta() {
+  aciertos++;
 
-  // Feedback visual
-  answerInput.classList.add("correct")
-  showFeedback("Ondo! 🎉", "correct")
+  // Mostrar feedback visual
+  inputRespuesta.classList.add("correct");
+  mostrarFeedback("Ondo! 🎉", "correct");
 
-  // Pasar a la siguiente pregunta
-  setTimeout(() => {
-    gameState.currentQuestion++
-    loadQuestion()
-  }, 1500)
+  // Pasar a la siguiente pregunta después de 1.5 segundos
+  setTimeout(function() {
+    preguntaActual++;
+    cargarPregunta();
+  }, 1500);
 }
 
-/**
- * Manejar respuesta incorrecta
- */
-function handleWrongAnswer(correctAnswer) {
-  gameState.wrongAnswers++
-  gameState.lives--
+// Función cuando la respuesta es incorrecta
+function manejarRespuestaIncorrecta(respuestaCorrecta) {
+  fallos++;
+  vidas--;
 
-  // Feedback visual
-  answerInput.classList.add("incorrect")
-  showFeedback(`Oker! Erantzun zuzena: ${correctAnswer}`, "incorrect")
+  // Mostrar feedback visual
+  inputRespuesta.classList.add("incorrect");
+  mostrarFeedback("Oker! Erantzun zuzena: " + respuestaCorrecta, "incorrect");
 
-  // Actualizar vidas
-  updateLives()
+  // Actualizar corazones de vidas
+  actualizarVidas();
 
-  // Comprobar si quedan vidas
-  if (gameState.lives <= 0) {
-    setTimeout(() => {
-      endGame()
-    }, 2000)
+  // Si no quedan vidas, terminar juego
+  if (vidas <= 0) {
+    setTimeout(function() {
+      terminarJuego();
+    }, 2000);
   } else {
-    // Pasar a la siguiente pregunta
-    setTimeout(() => {
-      gameState.currentQuestion++
-      loadQuestion()
-    }, 2000)
+    // Pasar a siguiente pregunta
+    setTimeout(function() {
+      preguntaActual++;
+      cargarPregunta();
+    }, 2000);
   }
 }
 
-/**
- * Mostrar mensaje de feedback
- */
-function showFeedback(message, type) {
-  feedbackMessage.textContent = message
-  feedbackMessage.className = `feedback-message show ${type}`
+// Función para mostrar mensaje de feedback
+function mostrarFeedback(mensaje, tipo) {
+  mensajeFeedback.textContent = mensaje;
+  mensajeFeedback.className = "feedback-message show " + tipo;
 }
 
-/**
- * Actualizar vidas
- */
-function updateLives() {
-  const lifeIcons = document.querySelectorAll(".life-icon")
-  lifeIcons.forEach((icon, index) => {
-    if (index >= gameState.lives) {
-      icon.classList.add("lost")
+// Función para actualizar las vidas visuales
+function actualizarVidas() {
+  var iconosVida = document.querySelectorAll(".life-icon");
+  for (var i = 0; i < iconosVida.length; i++) {
+    if (i >= vidas) {
+      iconosVida[i].classList.add("lost");
     }
-  })
+  }
 }
 
-/**
- * Actualizar barra de progreso
- */
-function updateProgress() {
-  const progress = (gameState.currentQuestion / gameState.totalQuestions) * 100
-  progressBar.style.width = `${progress}%`
-  progressText.textContent = `${gameState.currentQuestion}/${gameState.totalQuestions}`
+// Función para actualizar la barra de progreso
+function actualizarProgreso() {
+  var progreso = (preguntaActual / totalPreguntas) * 100;
+  barraProgreso.style.width = progreso + "%";
+  textoProgreso.textContent = preguntaActual + "/" + totalPreguntas;
 }
 
-/**
- * Finalizar el juego
- */
-async function endGame() {
-  const timeElapsed = Math.floor((Date.now() - gameState.startTime) / 1000)
-  const points = gameState.correctAnswers * 100
+// Función para terminar el juego
+function terminarJuego() {
+  var tiempoFinal = new Date().getTime();
+  var tiempoTranscurrido = Math.floor((tiempoFinal - tiempoInicio) / 1000);
+  var puntos = aciertos * 100;
 
   // Guardar resultado en el servidor
-  try {
-    const formData = new FormData()
-    formData.append("accion", "guardar_resultado")
-    formData.append("aciertos", gameState.correctAnswers)
-    formData.append("fallos", gameState.wrongAnswers)
-    formData.append("tiempo_empleado", timeElapsed)
+  var peticion = new XMLHttpRequest();
+  
+  peticion.onreadystatechange = function() {
+    if (peticion.readyState === 4 && peticion.status === 200) {
+      console.log("Resultado guardado correctamente");
+    }
+  };
 
-    await fetch("../controller/juego_controller.php", {
-      method: "POST",
-      body: formData,
-    })
-  } catch (error) {
-    console.error("Error al guardar resultado:", error)
-  }
+  // Preparar datos para enviar
+  var datos = "accion=guardar_resultado";
+  datos += "&aciertos=" + aciertos;
+  datos += "&fallos=" + fallos;
+  datos += "&tiempo_empleado=" + tiempoTranscurrido;
 
-  // Mostrar pantalla de resultados
-  showResults(points)
+  peticion.open("POST", "../controller/juego_controller.php", true);
+  peticion.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  peticion.send(datos);
+
+  // Mostrar resultados
+  mostrarResultados(puntos);
 }
 
-/**
- * Mostrar resultados
- */
-function showResults(points) {
+// Función para mostrar los resultados
+function mostrarResultados(puntos) {
   // Actualizar estadísticas
-  document.getElementById("correctAnswers").textContent = gameState.correctAnswers
-  document.getElementById("wrongAnswers").textContent = gameState.wrongAnswers
-  document.getElementById("totalPoints").textContent = points
+  document.getElementById("correctAnswers").textContent = aciertos;
+  document.getElementById("wrongAnswers").textContent = fallos;
+  document.getElementById("totalPoints").textContent = puntos;
 
   // Personalizar mensaje según rendimiento
-  const resultsIcon = document.getElementById("resultsIcon")
-  const resultsTitle = document.getElementById("resultsTitle")
+  var iconoResultado = document.getElementById("resultsIcon");
+  var tituloResultado = document.getElementById("resultsTitle");
 
-  if (gameState.correctAnswers >= 9) {
-    resultsIcon.textContent = "🏆"
-    resultsTitle.textContent = "Bikain!"
-  } else if (gameState.correctAnswers >= 7) {
-    resultsIcon.textContent = "🌟"
-    resultsTitle.textContent = "Oso ondo!"
-  } else if (gameState.correctAnswers >= 5) {
-    resultsIcon.textContent = "👍"
-    resultsTitle.textContent = "Ondo!"
+  if (aciertos >= 9) {
+    iconoResultado.textContent = "🏆";
+    tituloResultado.textContent = "Bikain!";
+  } else if (aciertos >= 7) {
+    iconoResultado.textContent = "🌟";
+    tituloResultado.textContent = "Oso ondo!";
+  } else if (aciertos >= 5) {
+    iconoResultado.textContent = "👍";
+    tituloResultado.textContent = "Ondo!";
   } else {
-    resultsIcon.textContent = "💪"
-    resultsTitle.textContent = "Jarraitu praktikatzen!"
+    iconoResultado.textContent = "💪";
+    tituloResultado.textContent = "Jarraitu praktikatzen!";
   }
 
   // Mostrar pantalla de resultados
-  showScreen("results")
+  mostrarPantalla("results");
 }
 
-/**
- * Reiniciar el juego
- */
+// Función para reiniciar el juego
 function restartGame() {
-  // Resetear estado
-  gameState.currentQuestion = 0
-  gameState.lives = 3
-  gameState.correctAnswers = 0
-  gameState.wrongAnswers = 0
-  gameState.startTime = null
+  // Resetear variables
+  preguntaActual = 0;
+  vidas = 3;
+  aciertos = 0;
+  fallos = 0;
+  tiempoInicio = 0;
 
   // Resetear vidas visuales
-  const lifeIcons = document.querySelectorAll(".life-icon")
-  lifeIcons.forEach((icon) => {
-    icon.classList.remove("lost")
-  })
+  var iconosVida = document.querySelectorAll(".life-icon");
+  for (var i = 0; i < iconosVida.length; i++) {
+    iconosVida[i].classList.remove("lost");
+  }
 
-  // Reinicializar
-  initGame()
+  // Reiniciar juego
+  iniciarJuego();
 }
 
-/**
- * Mostrar error
- */
-function showError(message) {
-  alert(message)
-  location.href = "perfilAlumno.php"
+// Función para mostrar error
+function mostrarError(mensaje) {
+  alert(mensaje);
+  window.location.href = "perfilAlumno.php";
 }
 
-/**
- * Normalizar string para comparación (sin tildes ni mayúsculas)
- */
-function normalizeString(str) {
-  return str
+// Función para limpiar texto (quitar tildes y mayúsculas)
+function limpiarTexto(texto) {
+  return texto
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .trim()
+    .trim();
 }

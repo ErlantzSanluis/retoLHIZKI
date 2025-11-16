@@ -473,4 +473,48 @@ class AccesoBD
         }
         return $stats;
     }
+
+    
+    // funciones para que el profesor active los juegos
+    function obtenerTodosLosJuegos() {
+        $juegos = array();
+        // 1=activo 2=inactivo
+        $sql = "SELECT id_juego, titulo, descripcion, id_estado FROM juego";
+        
+        $result = mysqli_query($this->conexion, $sql);
+        
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $juegos[] = $row;
+            }
+        }
+        return $juegos;
+    }
+
+    function actualizarEstadoJuego($id_juego, $id_estado) {
+        $id_juego = (int)$id_juego;
+        $id_estado = (int)$id_estado;
+        
+        $sql = "UPDATE juego SET id_estado = $id_estado WHERE id_juego = $id_juego";
+        
+        $resultado = mysqli_query($this->conexion, $sql);
+        return $resultado !== false;
+    }
+
+    function estaJuegoActivo($id_juego) {
+        $id_juego = (int)$id_juego;
+        
+        $sql = "SELECT id_estado FROM juego WHERE id_juego = $id_juego";
+        
+        $result = mysqli_query($this->conexion, $sql);
+        
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+            // El juego está activo solo si id_estado es 1
+            return $row['id_estado'] == 1;
+        }
+        
+        // Si no se encuentra el juego o está inactivo, devuelve false
+        return false;
+    }
 }

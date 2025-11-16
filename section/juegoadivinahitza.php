@@ -10,6 +10,20 @@ if (!isset($_SESSION['email'])) {
 require_once "../model/AccesoBD.php";
 require_once "../model/usuario.php";
 
+$accesoBD_comprobar_juego = new AccesoBD();
+$juego_adivina_hitza_ID = 1;
+
+// Si el juego NO está activo (no es 1)
+if (!$accesoBD_comprobar_juego->estaJuegoActivo($juego_adivina_hitza_ID)) {
+    // Cerramos la conexión y lo mandamos de vuelta a su perfil.
+    $accesoBD_comprobar_juego->cerrarConexion();
+    header('Location: perfilAlumno.php'); 
+    exit();
+}
+// si el juego está activo, la página carga normal.
+$accesoBD_comprobar_juego->cerrarConexion();
+
+
 $usuario = new Usuario();
 $accesoBD = new AccesoBD();
 
@@ -35,7 +49,6 @@ $accesoBD->cerrarConexion();
 </head>
 <body>
     <div class="mobile-container">
-        <!-- Header del juego -->
         <header class="game-header">
             <div class="header-content">
                 <button class="btn-back" onclick="location.href='perfilAlumno.php'">
@@ -56,7 +69,6 @@ $accesoBD->cerrarConexion();
             </div>
         </header>
 
-        <!-- Pantalla de carga inicial -->
         <div id="loadingScreen" class="game-screen active">
             <div class="loading-content">
                 <div class="loading-spinner">
@@ -69,7 +81,6 @@ $accesoBD->cerrarConexion();
             </div>
         </div>
 
-        <!-- Pantalla del juego -->
         <div id="gameScreen" class="game-screen">
             <div class="game-content">
                 <div class="question-card">
@@ -92,12 +103,10 @@ $accesoBD->cerrarConexion();
                     </button>
                 </div>
 
-                <!-- Feedback visual -->
                 <div id="feedbackMessage" class="feedback-message"></div>
             </div>
         </div>
 
-        <!-- Pantalla de resultados -->
         <div id="resultsScreen" class="game-screen">
             <div class="results-content">
                 <div class="results-icon" id="resultsIcon">🏆</div>

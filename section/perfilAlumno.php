@@ -22,6 +22,10 @@ if (!$accesoBD->rellenarUsuario($usuario, $_SESSION['email'])) {
     exit();
 }
 
+// Comprobar estado del juego
+$juego_adivina_hitza_ID = 1; 
+$juego_esta_activo = $accesoBD->estaJuegoActivo($juego_adivina_hitza_ID);
+
 $accesoBD->cerrarConexion();
 ?>
 <!DOCTYPE html>
@@ -74,8 +78,17 @@ $accesoBD->cerrarConexion();
                 <i class="bi bi-circle"></i>
                 <span>Parte-hartzea</span>
             </div>
-            <button class="start-game-btn" onclick="location.href='juegoAdivinaHitza.php'">Hasi jolasa</button>
-        </div>
+            
+            <?php if ($juego_esta_activo): ?>
+                <button class="start-game-btn" onclick="location.href='juegoAdivinaHitza.php'">
+                    Hasi jolasa
+                </button>
+            <?php else: ?>
+                <button class="start-game-btn" disabled style="background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; opacity: 0.7;">
+                    Jokoa ez dago erabilgarri
+                </button>
+            <?php endif; ?>
+            </div>
 
         <div class="stats-grid">
             <div class="stat-card">
@@ -107,8 +120,7 @@ $accesoBD->cerrarConexion();
                     <i class="bi bi-clock-history"></i>
                 </div>
                 <div class="feature-title">Jakoen historala</div>
-                <div class="feature-subtitle">Azken 15 jakoak</div><!--Se tienen que mover estos estilos a la hoja de estilos lo dejo como nota-->
-                <a href="historialAlumno.php" class="stretched-link" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;"></a>
+                <div class="feature-subtitle">Azken 15 jakoak</div><a href="historialAlumno.php" class="stretched-link" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;"></a>
             </div>
 
             <div class="feature-card">
@@ -131,9 +143,7 @@ $accesoBD->cerrarConexion();
     <?php include_once "footerAlumno.php"; ?>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Este script es para el inicio -->
     <script src="../js/inicioScript.js"></script>
-    <!-- Para confirmar el cierre de sesion -->
     <script src="../js/cerrar-sesion.js"></script>
 </body>
 </html>

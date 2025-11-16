@@ -1,0 +1,55 @@
+===========================================
+INSTRUCCIONES PARA AGREGAR EL JUEGO TEST
+===========================================
+
+Ejecuta las siguientes sentencias SQL en tu base de datos MySQL:
+
+1. Asegúrate de tener el estado "Inactivo":
+
+INSERT IGNORE INTO `estado_juego` (`id_estado`, `nombre_estado`) VALUES (2, 'Inactivo');
+
+
+2. Inserta el nuevo juego tipo TEST:
+
+INSERT INTO `juego` (`id_juego`, `titulo`, `descripcion`, `semana_numero`, `anio`, `fecha_inicio`, `fecha_fin`, `id_estado`, `tiempo_limite`, `num_preguntas`) VALUES
+(2, 'Test Hitza', 'Joko honetan hiru aukeretatik egokiena aukeratu behar duzu', NULL, NULL, NOW(), NULL, 2, NULL, 10);
+
+
+3. Listo! Ahora el profesor puede activar/desactivar ambos juegos desde su panel.
+
+NOTA: El juego se inserta como INACTIVO (id_estado=2), el profesor debe activarlo.
+
+===========================================
+ARCHIVOS CREADOS/MODIFICADOS
+===========================================
+
+NUEVOS ARCHIVOS:
+- controller/juego_test_controller.php  (Controlador del juego test)
+- section/juegoTestHitza.php            (Página del juego test)
+- js/juego_test.js                      (JavaScript simple sin fetch/async)
+- agregar_juego_test.sql                (Script SQL)
+
+ARCHIVOS MODIFICADOS:
+- section/perfilAlumno.php              (Ahora muestra ambos juegos)
+
+===========================================
+FUNCIONAMIENTO
+===========================================
+
+1. El profesor ve en su panel dos juegos:
+   - "Adivina Hitza" (ID 1)
+   - "Test Hitza" (ID 2)
+
+2. El profesor puede activar/desactivar cada uno con el switch.
+
+3. Los alumnos ven botones para ambos juegos:
+   - Si está activo: botón habilitado
+   - Si está inactivo: botón deshabilitado
+
+4. Ambos juegos usan la misma tabla "pregunta" que ya tiene las 3 opciones.
+
+5. El código es SUPER SIMPLE:
+   - Sin fetch, sin async/await
+   - XMLHttpRequest síncrono
+   - Código optimizado y directo
+

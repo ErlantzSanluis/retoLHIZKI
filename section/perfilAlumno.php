@@ -22,9 +22,11 @@ if (!$accesoBD->rellenarUsuario($usuario, $_SESSION['email'])) {
     exit();
 }
 
-// Comprobar estado del juego
-$juego_adivina_hitza_ID = 1; 
-$juego_esta_activo = $accesoBD->estaJuegoActivo($juego_adivina_hitza_ID);
+// Comprobar estado de los juegos
+$juego_adivina_hitza_ID = 1;
+$juego_test_hitza_ID = 2;
+$juego_adivina_activo = $accesoBD->estaJuegoActivo($juego_adivina_hitza_ID);
+$juego_test_activo = $accesoBD->estaJuegoActivo($juego_test_hitza_ID);
 
 $accesoBD->cerrarConexion();
 ?>
@@ -78,14 +80,24 @@ $accesoBD->cerrarConexion();
                 <i class="bi bi-circle"></i>
                 <span>Parte-hartzea</span>
             </div>
-            
-            <?php if ($juego_esta_activo): ?>
-                <button class="start-game-btn" onclick="location.href='juegoAdivinaHitza.php'">
-                    Hasi jolasa
+
+            <?php if ($juego_adivina_activo): ?>
+                <button class="start-game-btn mb-2" onclick="location.href='juegoAdivinaHitza.php'">
+                    Hasi Adivina Hitza
+                </button>
+            <?php else: ?>
+                <button class="start-game-btn mb-2" disabled style="background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; opacity: 0.7;">
+                    Adivina Hitza ez dago erabilgarri
+                </button>
+            <?php endif; ?>
+
+            <?php if ($juego_test_activo): ?>
+                <button class="start-game-btn" onclick="location.href='juegoTestHitza.php'">
+                    Hasi Test Hitza
                 </button>
             <?php else: ?>
                 <button class="start-game-btn" disabled style="background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; opacity: 0.7;">
-                    Jokoa ez dago erabilgarri
+                    Test Hitza ez dago erabilgarri
                 </button>
             <?php endif; ?>
             </div>
